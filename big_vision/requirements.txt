@@ -17,5 +17,5 @@ tensorflow-text
 tensorflow-gan
 psutil
 pycocoevalcap
-tensorflow==2.15
+tensorflow==2.13
 tensorflow-addons
