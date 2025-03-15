@@ -35,30 +35,23 @@ def get_config():
   config = mlc.ConfigDict()
 
   config.seed = 0
-  config.total_epochs = 90
-  config.num_classes = 1000
+  config.total_epochs = 200
+  config.num_classes = 10
   config.loss = 'softmax_xent'
 
   config.input = {}
   config.input.data = dict(
       name='cifar10',
-      split='train[:99%]',
+      split='train[:90%]',
   )
-  config.input.batch_size = 1024
+  config.input.batch_size = 256
   config.input.cache_raw = True  # Needs up to 120GB of RAM!
-  config.input.shuffle_buffer_size = 250_000
+  config.input.shuffle_buffer_size = 50_000
 
-  pp_common = (
-      '|value_range(-1, 1)'
-      '|onehot(1000, key="{lbl}", key_result="labels")'
-      '|keep("image", "labels")'
-  )
   config.input.pp = (
-      'decode_jpeg_and_inception_crop(224)|flip_lr|randaug(2,10)' +
-      pp_common.format(lbl='label')
+      'decode|resize(32,32)|flip_lr|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
   )
-  pp_eval = 'decode|resize_small(256)|central_crop(224)' + pp_common
-
+  pp_eval = 'decode|resize(32,32)|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
   # To continue using the near-defunct randaug op.
   config.pp_modules = ['ops_general', 'ops_image', 'ops_text', 'archive.randaug']
 
@@ -79,9 +72,9 @@ def get_config():
   config.optax_name = 'scale_by_adam'
   config.optax = dict(mu_dtype='bfloat16')
 
-  config.lr = 0.001
+  config.lr = 0.01
   config.wd = 0.0001
-  config.schedule = dict(warmup_steps=10_000, decay_type='cosine')
+  config.schedule = dict(warmup_steps=500, decay_type='cosine')
 
   config.mixup = dict(p=0.2, fold_in=None)
 
@@ -95,10 +88,8 @@ def get_config():
         log_steps=2500,  # Very fast O(seconds) so it's fine to run it often.
     )
   config.evals = {}
-  config.evals.train = get_eval('train[:2%]')
-  config.evals.minival = get_eval('train[99%:]')
-  config.evals.val = get_eval('validation')
-  config.evals.real = get_eval('validation', dataset='cifar10')
-  config.evals.real.pp_fn = pp_eval.format(lbl='real_label')
+  config.evals.train = get_eval('train[:90%]')
+  config.evals.val = get_eval('train[90%:]')
+  config.evals.test = get_eval('test')
 
   return config
