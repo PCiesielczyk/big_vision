@@ -49,9 +49,10 @@ def get_config():
   config.input.shuffle_buffer_size = 50_000
 
   config.input.pp = (
-      'decode|resize(32,32)|flip_lr|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
+      'decode|resize(32)|flip_lr|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
   )
-  pp_eval = 'decode|resize(32,32)|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
+  pp_eval = 'decode|resize(32)|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
+
   # To continue using the near-defunct randaug op.
   config.pp_modules = ['ops_general', 'ops_image', 'ops_text', 'archive.randaug']
 
