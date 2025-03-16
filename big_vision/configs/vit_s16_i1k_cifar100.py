@@ -7,22 +7,22 @@ def get_config():
 
     config.seed = 0
     config.total_epochs = 200
-    config.num_classes = 10
+    config.num_classes = 100
     config.loss = 'softmax_xent'
 
     config.input = {}
     config.input.data = dict(
-        name='cifar10',
+        name='cifar100',
         split='train[:90%]',
     )
     config.input.batch_size = 256
-    config.input.cache_raw = True  # Needs up to 120GB of RAM!
+    config.input.cache_raw = True
     config.input.shuffle_buffer_size = 50_000
 
     config.input.pp = (
-        'decode|resize(32)|flip_lr|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
+        'decode|resize(32)|flip_lr|value_range(-1, 1)|onehot(100, key="label", key_result="labels")|keep("image", "labels")'
     )
-    pp_eval = 'decode|resize(32)|value_range(-1, 1)|onehot(10, key="label", key_result="labels")|keep("image", "labels")'
+    pp_eval = 'decode|resize(32)|value_range(-1, 1)|onehot(100, key="label", key_result="labels")|keep("image", "labels")'
 
     # To continue using the near-defunct randaug op.
     config.pp_modules = ['ops_general', 'ops_image', 'ops_text', 'archive.randaug']
@@ -51,13 +51,13 @@ def get_config():
     config.mixup = dict(p=0.2, fold_in=None)
 
     # Eval section
-    def get_eval(split, dataset='cifar10'):
+    def get_eval(split, dataset='cifar100'):
         return dict(
             type='classification',
             data=dict(name=dataset, split=split),
             pp_fn=pp_eval.format(lbl='label'),
             loss_name=config.loss,
-            log_steps=2500,  # Very fast O(seconds) so it's fine to run it often.
+            log_steps=2500,
         )
 
     config.evals = {}
